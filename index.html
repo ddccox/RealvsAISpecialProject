@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deepfake vs Real</title>
+
+<style>
+/* ===== GLOBAL STYLE ===== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ===== BACKGROUND EFFECT ===== */
+.background-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: rgba(56, 189, 248, 0.15);
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: float 6s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-40px); }
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    text-align: center;
+    z-index: 2;
+}
+
+/* ===== TITLE ===== */
+.title {
+    font-size: 3rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+}
+
+/* Glitch effect */
+.title::before,
+.title::after {
+    content: "Deepfake vs Real";
+    position: absolute;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    color: #38bdf8;
+    z-index: -1;
+}
+
+.title::before {
+    animation: glitch 2s infinite;
+    color: #ef4444;
+}
+
+.title::after {
+    animation: glitch 1.5s infinite reverse;
+    color: #22c55e;
+}
+
+@keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+
+/* ===== SUBTEXT ===== */
+.subtitle {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    color: #cbd5e1;
+}
+
+/* ===== BUTTON ===== */
+button {
+    margin-top: 40px;
+    padding: 12px 28px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    background: #38bdf8;
+    color: #0f172a;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #0ea5e9;
+    transform: scale(1.05);
+}
+
+/* small scanline effect */
+.scanline {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="background-glow"></div>
+<div class="scanline"></div>
+
+<div class="container">
+    <div class="title">Deepfake vs Real</div>
+    <div class="subtitle">
+        Can you still trust what you see?
+    </div>
+
+    <button onclick="startGame()">Start Investigation</button>
+</div>
+
+<script>
+function startGame() {
+    alert("Loading Investigation Mode...");
+    // later you can redirect:
+    // window.location.href = "dashboard.html";
+}
+</script>
+
+</body>
+</html>
