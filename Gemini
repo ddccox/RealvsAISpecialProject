@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake vs. Real: AI Literacy Training</title>
+    <!-- FontAwesome Icons for UI styling -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0a0f1d;
+            --bg-card: #131c33;
+            --primary: #00f0ff;
+            --primary-glow: rgba(0, 240, 255, 0.3);
+            --secondary: #bd00ff;
+            --success: #00ff66;
+            --error: #ff0055;
+            --text-main: #f0f4f8;
+            --text-muted: #8a99ad;
+            --border: #223154;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* App Layout Container */
+        #app-container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Tech Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Screen Base Configuration */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; min-height: 100vh;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            z-index: 10;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+            position: relative;
+        }
+
+        /* Typography & Cyber UI elements */
+        h1, h2, h3 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--primary-glow);
+            text-align: center;
+        }
+
+        .cyber-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .cyber-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary);
+        }
+
+        /* Interactive UI Controls */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
+        button.secondary {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        button.secondary:hover {
+            background: var(--secondary);
+            color: var(--text-main);
+            box-shadow: 0 0 20px rgba(189, 0, 255, 0.4);
+        }
+
+        button:disabled {
+            border-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Header Navigation for Dashboards */
+        .app-header {
+            width: 100%;
+            background: rgba(19, 28, 51, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .hud-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .hud-stat {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .hud-stat span {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Component-Specific System Mockups */
+        .video-canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            aspect-ratio: 16/9;
+            background: #000;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .video-overlay-ui {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--error);
+            border: 1px solid var(--error);
+            font-size: 0.8rem;
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        .zoom-lens {
+            position: absolute;
+            border: 2px dashed var(--primary);
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Checkbox lists for detection verification */
+        .checklist-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .check-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            padding: 0.8rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .check-item:hover {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.02);
+        }
+
+        .check-item input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 18px; height: 18px;
+        }
+
+        /* Dynamic Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .option-card {
+            background: rgba(255,255,255,0.03);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            background: rgba(0,240,255,0.05);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Progress Bar Graphics */
+        .xp-bar-container {
+            width: 100%;
+            background: var(--border);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 0.5rem 0 1.5rem 0;
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 40%;
+            transition: width 0.5s ease-out;
+        }
+
+        /* Feed Assessment Stream View */
+        .social-feed {
+            width: 100%;
+            max-width: 550px;
+            max-height: 480px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            background: #070b14;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .feed-post {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-avatar {
+            width: 36px; height: 36px;
+            background: var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .post-author { font-weight: bold; font-size: 0.95rem; }
+
+        .feed-media-mock {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #02060e;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed var(--border);
+            overflow: hidden;
+        }
+
+        /* Modal Substructures */
+        .modal-mask {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 8, 16, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Leaders & Badges lists */
+        .data-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-list-item:last-child { border: none; }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .badge-icon-box {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+        .badge-icon-box.unlocked {
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Live Canvas Certificate System */
+        #cert-canvas {
+            background: #fff;
+            max-width: 100%;
+            height: auto;
+            border: 4px solid var(--border);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+
+    <div id="app-container">
+
+        <!-- CORE HUD HEADER (Visible on dashboard, game screens) -->
+        <header class="app-header" id="global-hud" style="display: none;">
+            <div style="font-weight: bold; letter-spacing: 1px; color: var(--primary);">
+                <i class="fa-solid fa-user-shield"></i> DEEPFAKE DETECTOR HUD
+            </div>
+            <div class="hud-stats">
+                <div class="hud-stat">RANK: <span id="hud-rank">Truth Seeker</span></div>
+                <div class="hud-stat">XP: <span id="hud-xp">120</span></div>
+                <div class="hud-stat">ACCURACY: <span id="hud-acc">74%</span></div>
+            </div>
+        </header>
+
+        <!-- SCREEN 1: LANDING PAGE -->
+        <section id="scr-landing" class="screen active">
+            <div style="text-align: center; max-width: 700px;">
+                <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem;"><i class="fa-solid fa-eye-slash"></i></div>
+                <h1 class="cyber-title">Deepfake vs. Real</h1>
+                <h2 class="cyber-subtitle">Can you still trust what you see?</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.6;">
+                    A gamified multimedia experience that trains Open and Distance e-Learning students to scan anomalies, counter synthetic misinformation, and detect AI-generated media content.
+                </p>
+                <div class="btn-group">
+                    <button onclick="router('scr-dashboard')"><i class="fa-solid fa-terminal"></i> Start Investigation</button>
+                    <button class="secondary" onclick="openAboutModal()"><i class="fa-solid fa-circle-info"></i> About Project</button>
+                    <button class="secondary" onclick="router('scr-tutorial')"><i class="fa-solid fa-graduation-cap"></i> How To Play</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: HOW TO PLAY / TUTORIAL PAGE -->
+        <section id="scr-tutorial" class="screen">
+            <div class="card">
+                <h2>How to Detect a Deepfake</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem; text-align: center;">Analyze video frames methodically using your technical assessment matrix.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: center;">
+                    <div class="video-canvas-container" style="margin:0;">
+                        <canvas id="tutorial-canvas"></canvas>
+                        <div class="video-overlay-ui"><i class="fa-solid fa-circle"></i> LIVE ANALYSIS</div>
+                    </div>
+                    <div>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.8rem;">
+                            <li><i class="fa-solid fa-square-check" style="color: var(--primary);"></i> <strong>Look for unnatural blinking:</strong> AI often skips micro-movements.</li>
+                            <li><i class="fa-solid fa-square-check" style="color: var(--primary);"></i> <strong>Check lip-sync consistency:</strong> Listen for subtle delays or shifting structures.</li>
+                            <li><i class="fa-solid fa-square-check" style="color: var(--primary);"></i> <strong>Observe lighting/shadows:</strong> Watch the nose bridge and dynamic contours.</li>
+                            <li><i class="fa-solid fa-square-check" style="color: var(--primary);"></i> <strong>Listen for robotic audio:</strong> Look for flat intonations and synthetic voice stitching.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="secondary" onclick="router('scr-landing')">Back</button>
+                <button onclick="router('scr-dashboard')">Skip to Control</button>
+                <button onclick="startTrainingFromTutorial()">Start Training Matrix</button>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: DASHBOARD / MISSION CONTROL -->
+        <section id="scr-dashboard" class="screen">
+            <div class="card" style="max-width: 850px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3><i class="fa-solid fa-gauge-high"></i> Welcome, Investigator</h3>
+                    <span style="font-family: monospace; color: var(--primary);">SYSTEM: ONLINE</span>
+                </div>
+                
+                <label style="font-size: 0.8rem; color: var(--text-muted); letter-spacing: 1px;">INVESTIGATOR XP PROGRESSION</label>
+                <div class="xp-bar-container">
+                    <div id="dashboard-xp-bar" class="xp-bar-fill"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 250px; gap: 1.5rem;">
+                    <div>
+                        <h4 style="margin-bottom: 1rem; color: var(--primary); text-transform: uppercase;">Available Assignments</h4>
+                        
+                        <!-- Level 1 Card Segment -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: var(--text-main);">LEVEL 1: Case File #01</strong>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Media Content: Viral Politician Interview</div>
+                            </div>
+                            <button onclick="loadLevelIntro(1)">Start Case</button>
+                        </div>
+
+                        <!-- Level 2 Card Segment -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: var(--text-main);">LEVEL 2: Case File #02</strong>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Media Content: Financial App Scam Clip</div>
+                            </div>
+                            <button id="btn-lvl-2" onclick="loadLevelIntro(2)">Start Case</button>
+                        </div>
+
+                        <!-- Level 3 Card Segment -->
+                        <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(34,49,84,0.4); padding: 1rem; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; opacity: 0.6;">
+                            <div>
+                                <strong style="color: var(--text-muted);"><i class="fa-solid fa-lock"></i> LEVEL 3: Case File #03</strong>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Media Content: Synthesis Breaking News Event</div>
+                            </div>
+                            <button disabled>Locked</button>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Hub Actions -->
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; border-left: 1px solid var(--border); padding-left: 1.5rem;">
+                        <h4 style="color: var(--text-main); font-size: 0.9rem; margin-bottom: 0.5rem;">HUB SYSTEMS</h4>
+                        <button class="secondary" style="padding: 0.5rem;" onclick="openBadgesModal()"><i class="fa-solid fa-award"></i> Badges</button>
+                        <button class="secondary" style="padding: 0.5rem;" onclick="openLeaderboardModal()"><i class="fa-solid fa-trophy"></i> Leaderboard</button>
+                        <button class="secondary" style="padding: 0.5rem;" onclick="openProfileModal()"><i class="fa-solid fa-id-card"></i> Operator Profile</button>
+                        <button style="margin-top: auto; border-color: var(--success); color: var(--success);" onclick="router('scr-assessment')"><i class="fa-solid fa-shield-halved"></i> Final Audit</button>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="secondary" onclick="router('scr-landing')">Disconnect System</button>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: LEVEL INTRO SCREEN -->
+        <section id="scr-level-intro" class="screen">
+            <div class="card" style="text-align: center; max-width: 600px;">
+                <div style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem;"><i class="fa-solid fa-folder-open"></i></div>
+                <h2 id="intro-case-title">CASE FILE #01</h2>
+                <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;">
+                <p id="intro-case-desc" style="font-size: 1.2rem; line-height: 1.6; color: var(--text-main); margin-bottom: 2rem;">
+                    A viral interview clip is spreading online. Can you determine whether the video is authentic or AI-generated?
+                </p>
+                <div style="background: rgba(189,0,255,0.05); border: 1px dashed var(--secondary); padding: 1rem; border-radius: 4px; font-size: 0.9rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-circle-exclamation"></i> Warning: Scan metrics require careful evaluation before choosing your submission profile.
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="secondary" onclick="router('scr-dashboard')">Return to Dashboard</button>
+                <button onclick="launchGameplayCore()"><i class="fa-solid fa-bolt"></i> Begin Analysis</button>
+            </div>
+        </section>
+
+        <!-- SCREEN 6: GAMEPLAY / VIDEO ANALYSIS SCREEN -->
+        <section id="scr-gameplay" class="screen">
+            <div class="card" style="max-width: 950px; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    <h3 id="gameplay-case-id" style="font-size: 1.1rem; color: var(--primary);">CASE #01</h3>
+                    <div style="font-family: monospace; font-weight: bold; color: var(--error); font-size: 1.1rem;">
+                        <i class="fa-solid fa-clock"></i> TIME REMAINING: <span id="gameplay-timer">00:45</span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem;">
+                    <!-- Video Area Component -->
+                    <div>
+                        <div class="video-canvas-container">
+                            <canvas id="gameplay-canvas"></canvas>
+                            <div class="video-overlay-ui" id="media-watermark"><i class="fa-solid fa-microchip"></i> UNVERIFIED FEED</div>
+                            <div id="lens-element" class="zoom-lens"></div>
+                        </div>
+                        <!-- Video Controls -->
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px;">
+                            <button style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="togglePlayState()"><i id="play-icon" class="fa-solid fa-pause"></i> Pause/Play</button>
+                            <button style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="restartVideoSim()"><i class="fa-solid fa-arrow-rotate-left"></i> Replay</button>
+                            <button class="secondary" style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="activateZoomTool()"><i class="fa-solid fa-magnifying-glass-plus"></i> Zoom Grid</button>
+                        </div>
+                    </div>
+
+                    <!-- Detection Checklist & Classification Option Cards -->
+                    <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-muted); letter-spacing: 1px;">DETECTION CHECKLIST</span>
+                            <div class="checklist-container">
+                                <label class="check-item"><input type="checkbox" id="chk-lip"> Lip-sync mismatch</label>
+                                <label class="check-item"><input type="checkbox" id="chk-eye"> Eye distortion</label>
+                                <label class="check-item"><input type="checkbox" id="chk-aud"> Audio glitching</label>
+                                <label class="check-item"><input type="checkbox" id="chk-warp"> Facial warping</label>
+                            </div>
+
+                            <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-muted); letter-spacing: 1px;">DECISION CLASSIFICATION</span>
+                            <div class="options-grid">
+                                <div class="option-card" onclick="selectDecisionOption(this, 'REAL')">REAL</div>
+                                <div class="option-card" onclick="selectDecisionOption(this, 'DEEPFAKE')">DEEPFAKE</div>
+                                <div class="option-card" onclick="selectDecisionOption(this, 'AI')">SYNTHETIC</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                            <button class="secondary" style="flex: 1; padding: 0.6rem;" onclick="useHintSystem()"><i class="fa-solid fa-lightbulb"></i> Use Hint</button>
+                            <button id="btn-submit-gameplay" style="flex: 2; padding: 0.6rem; border-color: var(--success); color: var(--success);" onclick="submitGameplaySelection()" disabled><i class="fa-solid fa-circle-check"></i> Submit Analysis</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 7: FEEDBACK SCREEN -->
+        <section id="scr-feedback" class="screen">
+            <div class="card" style="text-align: center; max-width: 650px;">
+                <h2 id="feedback-title" style="margin-bottom: 1rem;">ANALYSIS COMPLETE</h2>
+                <div id="feedback-status-banner" style="padding: 0.75rem; border-radius: 4px; font-weight: bold; margin-bottom: 1.5rem;">
+                    <!-- Filled dynamically -->
+                </div>
+                <p id="feedback-explanation" style="line-height: 1.6; margin-bottom: 2rem; color: var(--text-main);">
+                    Explanation text...
+                </p>
+                
+                <div style="background: rgba(0, 255, 102, 0.05); border: 1px solid var(--success); padding: 1.5rem; border-radius: 6px; display: inline-block; min-width: 250px; margin: 0 auto;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Reward Earnings</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--success);" id="feedback-xp-reward">+50 XP</div>
+                    <div style="font-size: 0.8rem; color: var(--primary); margin-top: 0.25rem;"><i class="fa-solid fa-chart-line"></i> Badge Verification Progressed</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="secondary" onclick="router('scr-dashboard')">Return to Dashboard</button>
+                <button id="btn-feedback-next" onclick="advanceFromFeedback()"><i class="fa-solid fa-arrow-right"></i> Next Phase</button>
+            </div>
+        </section>
+
+        <!-- SCREEN 10: FINAL ASSESSMENT PAGE -->
+        <section id="scr-assessment" class="screen">
+            <div class="card" style="max-width: 900px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3><i class="fa-solid fa-shield-halved"></i> Live Stream Misinformation Audit</h3>
+                    <div style="background: var(--secondary); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">CRITICAL ASSESSMENT</div>
+                </div>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                    Scroll down through this simulated live misinformation feed. Classify the posts to complete your training validation.
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem;">
+                    <!-- Left Column Scrollable feed -->
+                    <div class="social-feed" id="assessment-feed-container">
+                        <!-- Post 1 -->
+                        <div class="feed-post" id="post-0">
+                            <div class="post-header">
+                                <div class="post-avatar"><i class="fa-solid fa-circle-user"></i></div>
+                                <div>
+                                    <div class="post-author">GlobalNews_Matrix</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">Sponsored • Live Broadcast</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">BREAKING: Official statement delivered regarding new environmental mandates. Check face warping frame errors.</div>
+                            <div class="feed-media-mock" style="color: var(--error);"><i class="fa-solid fa-video-slash" style="font-size: 2rem;"></i></div>
+                        </div>
+                        <!-- Post 2 -->
+                        <div class="feed-post" id="post-1">
+                            <div class="post-header">
+                                <div class="post-avatar"><i class="fa-solid fa-user-astronaut"></i></div>
+                                <div>
+                                    <div class="post-author">CryptoWhale_88</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">2 hours ago</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">Celebrity tech figure leaks secret investment opportunity on stream! Voice matches but audio tracking looks robotic.</div>
+                            <div class="feed-media-mock" style="color: var(--primary);"><i class="fa-solid fa-robot" style="font-size: 2rem;"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column Audit Actions -->
+                    <div style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 6px;">
+                        <div>
+                            <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary); margin-bottom: 0.5rem;">EXAMINING POST MOCK MATRIX</div>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" id="audit-selected-text">Click an item inside the feed stream to trigger deep diagnostics.</p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <button class="secondary" style="padding: 0.5rem; font-size: 0.85rem; text-align: left;" onclick="markAssessmentPost('REAL')"><i class="fa-solid fa-check"></i> Classify as Safe / Real</button>
+                                <button class="secondary" style="padding: 0.5rem; font-size: 0.85rem; text-align: left;" onclick="markAssessmentPost('FAKE')"><i class="fa-solid fa-triangle-exclamation"></i> Classify as Synthetic Malicious</button>
+                            </div>
+                            
+                            <div style="margin-top: 1.5rem; padding: 0.75rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px;">
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">Audit Manifest Progress:</span>
+                                <div style="font-weight: bold; color: var(--text-main); font-size: 1.1rem; margin-top: 0.25rem;"><span id="audit-done-count">0</span> / 2 Posts Flagged</div>
+                            </div>
+                        </div>
+
+                        <button id="btn-submit-assessment" style="width: 100%; border-color: var(--success); color: var(--success);" onclick="processAssessmentResults()" disabled>Submit Final Scoresheet</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 11: FINAL RESULTS PAGE -->
+        <section id="scr-results" class="screen">
+            <div class="card" style="text-align: center; max-width: 700px;">
+                <div style="font-size: 3.5rem; color: var(--primary); margin-bottom: 0.5rem;"><i class="fa-solid fa-square-poll-vertical"></i></div>
+                <h2>Performance Evaluation</h2>
+                <div class="cyber-subtitle" id="results-rank-title" style="margin-bottom: 1.5rem; color: var(--success);">RANK: TRUTH GUARDIAN</div>
+                
+                <!-- Performance Statistics Metrics Table -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">ACCURACY RATE</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary);" id="results-acc">87%</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">CASES RESOLVED</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary);" id="results-solved">10</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">XP ACQUIRED</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary);" id="results-xp">1450</div>
+                    </div>
+                </div>
+
+                <p style="color: var(--text-muted); line-height: 1.5; font-size: 0.95rem;">
+                    Your analytical processing scores confirm capability standards required to verify media assets safely across standard academic network deployments.
+                </p>
+            </div>
+            <div class="btn-group">
+                <button class="secondary" onclick="resetAppProgress()">Play Again</button>
+                <button onclick="router('scr-certificate')"><i class="fa-solid fa-file-signature"></i> View &amp; Download Certificate</button>
+                <button class="secondary" onclick="router('scr-landing')">Exit Program</button>
+            </div>
+        </section>
+
+        <!-- SCREEN 12: CERTIFICATE PAGE -->
+        <section id="scr-certificate" class="screen">
+            <div class="card" style="max-width: 750px; text-align: center; background: #0c1424;">
+                <h3>System Verification Matrix</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.85rem;">Dynamic generation profile derived from browser crypt security logs.</p>
+                
+                <!-- HTML5 Canvas Render System for safe image generation -->
+                <div style="margin: 1rem 0; background: #fff; padding: 10px; inline-size: fit-content; margin-inline: auto; border-radius: 4px;">
+                    <canvas id="cert-canvas" width="650" height="420"></canvas>
+                </div>
+
+                <div class="btn-group">
+                    <button onclick="downloadCertificateMock()"><i class="fa-solid fa-file-pdf"></i> Download PDF Asset</button>
+                    <button class="secondary" onclick="alert('Share link copied to clipboard!')"><i class="fa-solid fa-share-nodes"></i> Share Credential</button>
+                    <button class="secondary" onclick="router('scr-dashboard')">Return Home</button>
+                </div>
+            </div>
+        </section>
+
+    </div> <!-- /#app-container -->
+
+
+    <!-- MODAL POPUP SYSTEM (SHARED OBJECTS CONTAINER) -->
+    
+    <!-- SECTION 2: ABOUT MODAL -->
+    <div id="mdl-about" class="modal-mask">
+        <div class="card" style="max-width: 550px;">
+            <h3>About the Project</h3>
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;">
+            <p style="line-height: 1.6; margin-bottom: 1.5rem; color: var(--text-main);">
+                <strong>Deepfake vs. Real</strong> is an educational multimedia platform built specifically to enhance AI media literacy among Filipino Open and Distance e-Learning students.
+            </p>
+            <p style="line-height: 1.6; margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                Through localized context metrics and dynamic canvas-based frame inspection routines, users construct strong verification mental frameworks to resist fake streaming algorithms, social engineering scams, and automated visual alterations.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="secondary" onclick="closeAllModals()">Back</button>
+                <button onclick="closeAllModals(); router('scr-dashboard');">Start Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 8: BADGES MODAL -->
+    <div id="mdl-badges" class="modal-mask">
+        <div class="card" style="max-width: 550px;">
+            <h3>Earned Investigator Badges</h3>
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;">
+            
+            <div class="badge-grid">
+                <div>
+                    <div class="badge-icon-box unlocked"><i class="fa-solid fa-eye"></i></div>
+                    <strong style="font-size: 0.9rem; display:block;">Eye Detector</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Detect 5 fake videos</span>
+                </div>
+                <div>
+                    <div class="badge-icon-box unlocked" id="badge-truth-seeker"><i class="fa-solid fa-fingerprint"></i></div>
+                    <strong style="font-size: 0.9rem; display:block;">Truth Seeker</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Reach 80% accuracy</span>
+                </div>
+                <div>
+                    <div class="badge-icon-box" id="badge-analyst"><i class="fa-solid fa-brain"></i></div>
+                    <strong style="font-size: 0.9rem; display:block;">AI Analyst</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Complete Level 3</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button class="secondary" onclick="closeAllModals()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 9: LEADERBOARD MODAL -->
+    <div id="mdl-leaderboard" class="modal-mask">
+        <div class="card" style="max-width: 500px;">
+            <h3>Global Investigator Standings</h3>
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;">
+            
+            <div style="display: flex; flex-direction: column;">
+                <div class="data-list-item" style="background: rgba(0, 240, 255, 0.05);">
+                    <span><strong>1. Alex</strong> (Filinvest Hub)</span>
+                    <span style="color: var(--primary); font-weight: bold;">1450 XP</span>
+                </div>
+                <div class="data-list-item">
+                    <span><strong>2. Dianne</strong> (UPOU Group A)</span>
+                    <span style="color: var(--primary); font-weight: bold;">1320 XP</span>
+                </div>
+                <div class="data-list-item">
+                    <span><strong>3. Marco</strong> (Quezon Focal Point)</span>
+                    <span style="color: var(--primary); font-weight: bold;">1100 XP</span>
+                </div>
+                <div class="data-list-item" id="leaderboard-user-row" style="border-top: 2px dashed var(--border); margin-top: 0.5rem;">
+                    <span><strong>4. You</strong> (Investigator Profile)</span>
+                    <span style="color: var(--secondary); font-weight: bold;" id="leaderboard-user-xp">120 XP</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button class="secondary" onclick="closeAllModals()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BONUS COMPONENT: USER PROFILE MODAL -->
+    <div id="mdl-profile" class="modal-mask">
+        <div class="card" style="max-width: 480px;">
+            <h3>Operator System Profile</h3>
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;">
+            
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <div style="width: 70px; height: 70px; border-radius: 50%; background: var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--primary); border: 2px solid var(--primary); margin-bottom: 0.5rem;">
+                    <i class="fa-solid fa-user-secret"></i>
+                </div>
+                <h4 id="profile-name-tag">INVESTIGATOR_ODEL_STUDENT</h4>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Node Assignment: Philippines Remote Terminal</span>
+            </div>
+
+            <div style="font-size: 0.9rem; display:flex; flex-direction:column; gap:0.5rem; background:rgba(0,0,0,0.2); padding:1rem; border-radius:4px;">
+                <div style="display:flex; justify-content:space-between;"><span>Assigned Rank Level:</span><span id="prof-rank" style="color:var(--primary);">Truth Seeker</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Accumulated XP Points:</span><span id="prof-xp" style="color:var(--primary);">120</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Asset Diagnostic Target:</span><span id="prof-acc" style="color:var(--primary);">74%</span></div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button class="secondary" onclick="closeAllModals()">Close</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- CORE APPLICATION LOGIC ENGINES (JAVASCRIPT STATE MACHINE) -->
+    <script>
+        // Application State State-Tree Object
+        const state = {
+            userXP: 120,
+            userAccuracy: 74,
+            userRank: "Truth Seeker",
+            currentLevel: 1,
+            selectedOption: null,
+            timerValue: 45,
+            timerInterval: null,
+            isPlaying: true,
+            zoomActive: false,
+            // Simulated Level Data Configuration Objects Matrix
+            levels: {
+                1: {
+                    id: "CASE #01",
+                    title: "CASE FILE #01",
+                    description: "A viral interview clip is spreading online. Can you determine whether the video is authentic or AI-generated?",
+                    hint: "Observe the mouth lines. Inconsistent shadow configurations reveal structural rendering mismatches.",
+                    correctOption: "DEEPFAKE",
+                    explanation: "The video showed unnatural mouth movement and inconsistent eye reflections, indicating AI manipulation.",
+                    xpReward: 150
+                },
+                2: {
+                    id: "CASE #02",
+                    title: "CASE FILE #02",
+                    description: "An emergency asset-loss announcement video is offering dynamic high-speed market returns. Scan carefully.",
+                    hint: "The background lighting doesn't sync when the subject turns. Watch facial border contours.",
+                    correctOption: "AI",
+                    explanation: "Correct! The footage displays complete structural synthetic blending, generating matching human features natively.",
+                    xpReward: 250
+                }
+            },
+            // Assessment Sub-system State tracker arrays
+            assessmentFeed: [
+                { id: 0, type: 'FAKE', verified: false },
+                { id: 1, type: 'REAL', verified: false }
+            ],
+            selectedAssessmentIndex: null,
+            completedAssessmentCount: 0
+        };
+
+        // Canvas Rendering Frame Animation State Variables
+        let gameplayCanvas, gameplayCtx;
+        let tutorialCanvas, tutorialCtx;
+        let animationFrameId = null;
+        let pulseFrame = 0;
+
+        window.onload = function() {
+            initCanvases();
+            updateHUDDisplay();
+            // Start silent looping drawing systems on default backgrounds
+            animateTutorialCanvas();
+        };
+
+        // Routing engine navigation structure
+        function router(screenId) {
+            // Stop active rendering loops if jumping screens
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            clearInterval(state.timerInterval);
+
+            // Hide all views globally
+            document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active'));
+            
+            // Unveil designated layout
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) targetScreen.classList.add('active');
+
+            // Conditional HUD Visibility evaluation rules
+            const hud = document.getElementById('global-hud');
+            if (screenId === '留下landing' || screenId === 'scr-landing' || screenId === 'scr-certificate') {
+                hud.style.display = 'none';
+            } else {
+                hud.style.display = 'flex';
+            }
+
+            // Screen activation callbacks
+            if (screenId === 'scr-tutorial') {
+                animateTutorialCanvas();
+            } else if (screenId === 'scr-gameplay') {
+                runGameplayCanvasLoop();
+                startGameplayTimer();
+            } else if (screenId === 'scr-certificate') {
+                renderLiveCertificate();
+            }
+        }
+
+        // HUD Synchronizer system
+        function updateHUDDisplay() {
+            // Re-evaluate rank thresholds dynamically
+            if(state.userXP >= 500) state.userRank = "Truth Guardian";
+            else if(state.userXP >= 250) state.userRank = "Lead Analyst";
+
+            document.getElementById('hud-rank').innerText = state.userRank;
+            document.getElementById('hud-xp').innerText = state.userXP;
+            document.getElementById('hud-acc').innerText = state.userAccuracy + "%";
+
+            // Dashboard items update
+            document.getElementById('dashboard-xp-bar').style.width = Math.min((state.userXP / 600) * 100, 100) + "%";
+            document.getElementById('leaderboard-user-xp').innerText = state.userXP + " XP";
+            
+            // Profile components syncing values
+            document.getElementById('prof-rank').innerText = state.userRank;
+            document.getElementById('prof-xp').innerText = state.userXP;
+            document.getElementById('prof-acc').innerText = state.userAccuracy + "%";
+        }
+
+        // Modal Management functions
+        function openAboutModal() { document.getElementById('mdl-about').style.display = 'flex'; }
+        function openBadgesModal() { 
+            if(state.userAccuracy >= 80) document.getElementById('badge-truth-seeker').classList.add('unlocked');
+            if(state.userXP >= 500) document.getElementById('badge-analyst').classList.add('unlocked');
+            document.getElementById('mdl-badges').style.display = 'flex'; 
+        }
+        function openLeaderboardModal() { document.getElementById('mdl-leaderboard').style.display = 'flex'; }
+        function openProfileModal() { document.getElementById('mdl-profile').style.display = 'flex'; }
+        function closeAllModals() {
+            document.querySelectorAll('.modal-mask').forEach(m => m.style.display = 'none');
+        }
+
+        // Tutorial Navigation Bridge handler
+        function startTrainingFromTutorial() {
+            state.currentLevel = 1;
+            loadLevelIntro(1);
+        }
+
+        // Level Context dynamic compiler
+        function loadLevelIntro(lvlNumber) {
+            state.currentLevel = lvlNumber;
+            const context = state.levels[lvlNumber];
+            
+            document.getElementById('intro-case-title').innerText = context.title;
+            document.getElementById('intro-case-desc').innerText = context.description;
+            
+            router('scr-level-intro');
+        }
+
+        function launchGameplayCore() {
+            const context = state.levels[state.currentLevel];
+            document.getElementById('gameplay-case-id').innerText = context.id;
+            
+            // Clear prior states
+            state.selectedOption = null;
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.checklist-container input').forEach(i => i.checked = false);
+            document.getElementById('btn-submit-gameplay').disabled = true;
+            
+            router('scr-gameplay');
+        }
+
+        // Interactive Analysis Option Selectors
+        function selectDecisionOption(element, value) {
+            state.selectedOption = value;
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            // Validation requirement verification rule
+            document.getElementById('btn-submit-gameplay').disabled = false;
+        }
+
+        // Level Gameplay Submit evaluation
+        function submitGameplaySelection() {
+            clearInterval(state.timerInterval);
+            const context = state.levels[state.currentLevel];
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackStatus = document.getElementById('feedback-status-banner');
+            const feedbackExpl = document.getElementById('feedback-explanation');
+            const feedbackReward = document.getElementById('feedback-xp-reward');
+
+            if (state.selectedOption === context.correctOption) {
+                feedbackTitle.innerText = "ANALYSIS VALIDATED";
+                feedbackStatus.innerText = "✓ CORRECT RECOGNITION DETECTED";
+                feedbackStatus.style.background = "rgba(0, 255, 102, 0.2)";
+                feedbackStatus.style.color = "var(--success)";
+                feedbackExpl.innerText = context.explanation;
+                
+                state.userXP += context.xpReward;
+                // Accumulate calculation accuracy optimization step
+                state.userAccuracy = Math.min(state.userAccuracy + 6, 96);
+                feedbackReward.innerText = "+" + context.xpReward + " XP";
+            } else {
+                feedbackTitle.innerText = "DIAGNOSTIC FAULT";
+                feedbackStatus.innerText = "✕ MEDIA CLASSIFICATION ERROR";
+                feedbackStatus.style.background = "rgba(255, 0, 85, 0.2)";
+                feedbackStatus.style.color = "var(--error)";
+                feedbackExpl.innerText = "Investigation parameters missed critical signature anomalies. Remember: " + context.hint;
+                
+                state.userAccuracy = Math.max(state.userAccuracy - 8, 45);
+                feedbackReward.innerText = "+0 XP";
+            }
+
+            // Route adjustment based on depth configuration settings
+            const nextBtn = document.getElementById('btn-feedback-next');
+            if (state.currentLevel === 1) {
+                nextBtn.innerText = "Proceed to Case #02";
+                document.getElementById('btn-lvl-2').disabled = false;
+            } else {
+                nextBtn.innerText = "Advance to Audit Stream";
+            }
+
+            updateHUDDisplay();
+            router('scr-feedback');
+        }
+
+        function advanceFromFeedback() {
+            if(state.currentLevel === 1) {
+                loadLevelIntro(2);
+            } else {
+                setupAssessmentFeed();
+                router('scr-assessment');
+            }
+        }
+
+        function useHintSystem() {
+            const context = state.levels[state.currentLevel];
+            alert("MATRIX DECODED INPUT: " + context.hint);
+        }
+
+        // Gameplay Audio/Video Canvas simulation generators
+        function initCanvases() {
+            gameplayCanvas = document.getElementById('gameplay-canvas');
+            gameplayCtx = gameplayCanvas.getContext('2d');
+            tutorialCanvas = document.getElementById('tutorial-canvas');
+            tutorialCtx = tutorialCanvas.getContext('2d');
+            
+            gameplayCanvas.width = 640;
+            gameplayCanvas.height = 360;
+            tutorialCanvas.width = 640;
+            tutorialCanvas.height = 360;
+
+            // Setup Feed Click Handlers
+            document.getElementById('post-0').onclick = () => selectAssessmentPost(0);
+            document.getElementById('post-1').onclick = () => selectAssessmentPost(1);
+        }
+
+        function animateTutorialCanvas() {
+            pulseFrame++;
+            tutorialCtx.fillStyle = '#060a14';
+            tutorialCtx.fillRect(0, 0, 640, 360);
+            
+            // Draw face structure lines wireframe vector graphic
+            tutorialCtx.strokeStyle = '#00f0ff';
+            tutorialCtx.lineWidth = 1.5;
+            tutorialCtx.beginPath();
+            tutorialCtx.arc(320, 160, 80, 0, Math.PI * 2);
+            tutorialCtx.stroke();
+
+            // Draw eye tracking target reticles
+            tutorialCtx.fillStyle = '#bd00ff';
+            tutorialCtx.beginPath();
+            tutorialCtx.arc(290, 150, 6, 0, Math.PI * 2);
+            tutorialCtx.arc(350, 150, 6, 0, Math.PI * 2);
+            tutorialCtx.fill();
+
+            // Overlay artificial target markers
+            if(Math.sin(pulseFrame * 0.1) > 0) {
+                tutorialCtx.strokeStyle = '#ff0055';
+                tutorialCtx.strokeRect(270, 135, 40, 30);
+                tutorialCtx.strokeRect(330, 135, 40, 30);
+                
+                tutorialCtx.fillStyle = '#ff0055';
+                tutorialCtx.font = '10px monospace';
+                tutorialCtx.fillText("ANOMALY: BLINK FAIL", 250, 120);
+            }
+
+            animationFrameId = requestAnimationFrame(animateTutorialCanvas);
+        }
+
+        function runGameplayCanvasLoop() {
+            pulseFrame++;
+            gameplayCtx.fillStyle = '#030710';
+            gameplayCtx.fillRect(0, 0, 640, 360);
+
+            if(state.isPlaying) {
+                // Render simulated human face subject data
+                gameplayCtx.strokeStyle = 'rgba(0, 240, 255, 0.4)';
+                gameplayCtx.lineWidth = 1;
+                // Oval base mask
+                gameplayCtx.beginPath();
+                gameplayCtx.ellipse(320, 180, 75, 105, 0, 0, Math.PI * 2);
+                gameplayCtx.stroke();
+
+                // Structural noise generation step
+                gameplayCtx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+                for (let i = 0; i < 15; i++) {
+                    gameplayCtx.fillRect(Math.random() * 640, Math.random() * 360, 2, 2);
+                }
+
+                // Render shifting mouth metrics if level 1 anomalies occur
+                gameplayCtx.strokeStyle = state.currentLevel === 1 ? '#ff0055' : '#00ff66';
+                gameplayCtx.beginPath();
+                // Simulating wave lip motion matrix
+                gameplayCtx.moveTo(290, 230);
+                gameplayCtx.bezierCurveTo(305, 220 + Math.sin(pulseFrame*0.2)*8, 335, 220 + Math.sin(pulseFrame*0.2)*8, 350, 230);
+                gameplayCtx.stroke();
+            }
+
+            // Lens scope view modification tracking layer
+            if(state.zoomActive) {
+                const lens = document.getElementById('lens-element');
+                lens.style.display = "block";
+                lens.style.left = "280px";
+                lens.style.top = "140px";
+            } else {
+                document.getElementById('lens-element').style.display = "none";
+            }
+
+            animationFrameId = requestAnimationFrame(runGameplayCanvasLoop);
+        }
+
+        function togglePlayState() {
+            state.isPlaying = !state.isPlaying;
+            document.getElementById('play-icon').className = state.isPlaying ? "fa-solid fa-pause" : "fa-solid fa-play";
+        }
+
+        function restartVideoSim() {
+            state.isPlaying = true;
+            pulseFrame = 0;
+        }
+
+        function activateZoomTool() {
+            state.zoomActive = !state.zoomActive;
+        }
+
+        function startGameplayTimer() {
+            state.timerValue = 45;
+            document.getElementById('gameplay-timer').innerText = "00:45";
+            
+            state.timerInterval = setInterval(() => {
+                state.timerValue--;
+                let formatSec = state.timerValue < 10 ? "0" + state.timerValue : state.timerValue;
+                document.getElementById('gameplay-timer').innerText = "00:" + formatSec;
+                
+                if(state.timerValue <= 0) {
+                    clearInterval(state.timerInterval);
+                    alert("Analysis Timeframe expired! Submitting automated zero score.");
+                    submitGameplaySelection();
+                }
+            }, 1000);
+        }
+
+        // SCREEN 10: SOCIAL FEED ASSESSMENT IMPLEMENTATION RENDER ENGINES
+        function setupAssessmentFeed() {
+            state.selectedAssessmentIndex = null;
+            state.completedAssessmentCount = 0;
+            state.assessmentFeed.forEach(p => p.verified = false);
+            
+            document.getElementById('audit-done-count').innerText = "0";
+            document.getElementById('btn-submit-assessment').disabled = true;
+            document.getElementById('audit-selected-text').innerText = "Click an item inside the feed stream to trigger deep diagnostics.";
+            
+            document.querySelectorAll('.feed-post').forEach(p => {
+                p.style.borderColor = "var(--border)";
+                p.style.background = "var(--bg-card)";
+            });
+        }
+
+        function selectAssessmentPost(index) {
+            state.selectedAssessmentIndex = index;
+            document.querySelectorAll('.feed-post').forEach(p => p.style.background = "var(--bg-card)");
+            document.getElementById('post-' + index).style.background = "rgba(189, 0, 255, 0.08)";
+            document.getElementById('audit-selected-text').innerText = "Examining Stream Asset #" + (index + 1) + ". Choose validation payload alignment standard below:";
+        }
+
+        function markAssessmentPost(decision) {
+            if(state.selectedAssessmentIndex === null) {
+                alert("Please select a post inside the scrollable live stream window first.");
+                return;
+            }
+            
+            const targetPostData = state.state = state.assessmentFeed[state.selectedAssessmentIndex];
+            if(!targetPostData.verified) {
+                targetPostData.verified = true;
+                targetPostData.userChoice = decision;
+                state.completedAssessmentCount++;
+                
+                const element = document.getElementById('post-' + state.selectedAssessmentIndex);
+                element.style.borderColor = "var(--primary)";
+                
+                document.getElementById('audit-done-count').innerText = state.completedAssessmentCount;
+                
+                if(state.completedAssessmentCount >= 2) {
+                    document.getElementById('btn-submit-assessment').disabled = false;
+                }
+            }
+        }
+
+        function processAssessmentResults() {
+            // Process dynamic tally score calculations
+            let correctlyIdentified = 0;
+            state.assessmentFeed.forEach(p => {
+                if(p.type === p.userChoice) correctlyIdentified++;
+            });
+
+            // Adjust score fields metrics profiles explicitly
+            state.userXP += 300; 
+            state.userAccuracy = Math.round((state.userAccuracy + 88) / 2);
+            
+            document.getElementById('results-rank-title').innerText = "RANK: " + state.userRank.toUpperCase();
+            document.getElementById('results-acc').innerText = state.userAccuracy + "%";
+            document.getElementById('results-solved').innerText = "12";
+            document.getElementById('results-xp').innerText = state.userXP;
+
+            router('scr-results');
+        }
+
+        function resetAppProgress() {
+            state.userXP = 120;
+            state.userAccuracy = 74;
+            state.userRank = "Truth Seeker";
+            document.getElementById('btn-lvl-2').disabled = true;
+            updateHUDDisplay();
+            router('scr-landing');
+        }
+
+        // SCREEN 12: DYNAMIC HTML5 CANVAS CERTIFICATE RENDER SYSTEM
+        function renderLiveCertificate() {
+            const certCanvas = document.getElementById('cert-canvas');
+            const ctx = certCanvas.getContext('2d');
+            
+            // Background Layer Base fill
+            ctx.fillStyle = '#0a101d';
+            ctx.fillRect(0, 0, 650, 420);
+            
+            // Tech Borders lines matrix design
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(15, 15, 620, 390);
+            
+            ctx.strokeStyle = '#bd00ff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(22, 22, 606, 376);
+
+            // Text Metadata items placement
+            ctx.fillStyle = '#00f0ff';
+            ctx.font = 'bold 22px "Segoe UI",Arial,sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText("CERTIFICATE OF COMPLETION", 325, 75);
+            
+            ctx.fillStyle = '#8a99ad';
+            ctx.font = '14px monospace';
+            ctx.fillText("SECURE DIGITAL ID CORE VERIFICATION MATRIX", 325, 110);
+            
+            ctx.fillStyle = '#f0f4f8';
+            ctx.font = '16px serif';
+            ctx.fillText("This certifies that operational clearances are awarded to:", 325, 165);
+            
+            // Target Student Name dynamic generation step
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 26px "Courier New",monospace';
+            ctx.fillText("INVESTIGATOR_ODEL_STUDENT", 325, 215);
+            
+            ctx.fillStyle = '#8a99ad';
+            ctx.font = '14px "Segoe UI",sans-serif';
+            ctx.fillText("for successfully completing the specialized security validation track:", 325, 265);
+            
+            ctx.fillStyle = '#bd00ff';
+            ctx.font = 'bold 18px "Segoe UI",sans-serif';
+            ctx.fillText("Deepfake vs. Real AI Literacy Training Program", 325, 300);
+
+            // Footer security cryptographic hashes validation lines
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+            ctx.font = '9px monospace';
+            ctx.fillText("VERIFICATION NODE REVERSE SIGNATURE MOCK KEYHASH: " + Math.random().toString(16).substr(2, 8).toUpperCase(), 325, 365);
+            ctx.fillText("ACCURACY RATING ACCOUNTABILITY TARGET PROFILED: " + state.userAccuracy + "%", 325, 380);
+        }
+
+        function downloadCertificateMock() {
+            // Emulate processing download operations sequence
+            alert("Generating target dynamic file mapping schema...\nPDF Document Saved down to local directory system download tree storage space.");
+        }
+    </script>
+</body>
+</html>
